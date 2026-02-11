@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>松鹤账号中心 - 统一身份认证</title>
+    <!-- 加载 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 加载 React 和 Lucide 图标 -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
+        body { font-family: 'Noto Sans SC', sans-serif; }
+        .animate-spin-slow { animation: spin 3s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- 核心组件 ---
+        function App() {
+            const [view, setView] = useState('login'); // login, dash, edit_profile, change_pwd
+            const [isProcessing, setIsProcessing] = useState(false);
+            const [profile, setProfile] = useState(null);
+
+            // 模拟表单状态
+            const [loginId, setLoginId] = useState('');
+            const [loginPwd, setLoginPwd] = useState('');
+            const [newNick, setNewNick] = useState('');
+            const [newColor, setNewColor] = useState('#4f46e5');
+
+            const colors = ['#4f46e5', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+
+            // 获取重定向地址
+            const getRedirectUrl = () => {
+                const params = new URLSearchParams(window.location.search);
+                return params.get('redirect');
+            };
+
+            // 模拟登录/注册逻辑 (实际应连接 Firebase，此处为演示逻辑补全)
+            const handleLogin = () => {
+                if (!/^\d{10}$/.test(loginId)) return alert("请输入10位松鹤学号");
+                if (loginPwd.length < 4) return alert("密码至少4位");
+
+                setIsProcessing(true);
+                // 模拟网络延迟
+                setTimeout(() => {
+                    const userData = {
+                        uid: loginId,
+                        nickname: `松鹤学子_${loginId.slice(-4)}`,
+                        avatarColor: '#4f46e5'
+                    };
+                    setProfile(userData);
+                    
+                    const redirect = getRedirectUrl();
+                    if (redirect) {
+                        finishAndRedirect(userData, redirect);
+                    } else {
+                        setView('dash');
+                    }
+                    setIsProcessing(false);
+                }, 1000);
+            };
+
+            const finishAndRedirect = (data, targetUrl) => {
+                const token = btoa(encodeURIComponent(JSON.stringify({
+                    uid: data.uid,
+                    name: data.nickname,
+                    color: data.avatarColor,
+                    time: Date.now()
+                })));
+                try {
+                    const url = new URL(targetUrl);
+                    url.searchParams.set('songhe_token', token);
+                    window.location.href = url.toString();
+                } catch (e) {
+                    alert("跳转地址无效");
+                    setView('dash');
+                }
+            };
+
+            return (
+                <div className="min-h-screen flex items-center justify-center p-4">
+                    <div className="w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-100 relative">
+                        
+                        {isProcessing && (
+                            <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-50 flex items-center justify-center">
+                                <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                        )}
+
+                        {/* 登录视图 */}
+                        {view === 'login' && (
+                            <div className="p-8 text-center">
+                                <div className="w-20 h-20 bg-indigo-600 rounded-3xl mx-auto flex items-center justify-center shadow-lg mb-6">
+                                    <i data-lucide="shield-check" class="text-white w-10 h-10"></i>
+                                </div>
+                                <h1 className="text-2xl font-black text-slate-800 mb-2">松鹤账号中心</h1>
+                                <p className="text-slate-500 text-sm mb-8">统一身份认证 · 跨程序同步</p>
+                                
+                                <div className="space-y-4">
+                                    <input 
+                                        type="text" placeholder="10位松鹤学号" 
+                                        className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none transition-all"
+                                        value={loginId} onChange={e => setLoginId(e.target.value)}
+                                    />
+                                    <input 
+                                        type="password" placeholder="通行证密码" 
+                                        className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none transition-all"
+                                        value={loginPwd} onChange={e => setLoginPwd(e.target.value)}
+                                    />
+                                    <button 
+                                        onClick={handleLogin}
+                                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
+                                    >
+                                        授权并登录 <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 控制面板 */}
+                        {view === 'dash' && profile && (
+                            <div>
+                                <div className="bg-indigo-600 p-8 text-center text-white">
+                                    <div 
+                                        className="w-24 h-24 rounded-[2.5rem] mx-auto flex items-center justify-center text-3xl font-bold border-4 border-white/20 mb-4" 
+                                        style={{ backgroundColor: profile.avatarColor }}
+                                    >
+                                        {profile.nickname[0]}
+                                    </div>
+                                    <h2 className="text-xl font-bold">{profile.nickname}</h2>
+                                    <p className="text-indigo-100 text-xs opacity-80 uppercase tracking-widest">{profile.uid}</p>
+                                </div>
+                                <div className="p-6 space-y-3">
+                                    <div onClick={() => setView('edit_profile')} className="p-4 bg-slate-50 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-slate-100 transition-all">
+                                        <div className="flex items-center gap-3">
+                                            <i data-lucide="user" class="text-indigo-600 w-5 h-5"></i>
+                                            <span className="font-bold text-slate-700">资料设置</span>
+                                        </div>
+                                        <i data-lucide="chevron-right" class="text-slate-300 w-5 h-5"></i>
+                                    </div>
+                                    <button onClick={() => window.location.reload()} className="w-full py-4 mt-4 border-2 border-slate-100 text-slate-400 font-bold rounded-2xl hover:bg-slate-50 flex items-center justify-center gap-2">
+                                        <i data-lucide="log-out" class="w-5 h-5"></i> 退出登录
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 修改资料 */}
+                        {view === 'edit_profile' && (
+                            <div className="p-8">
+                                <h2 className="text-xl font-black mb-6">修改个人资料</h2>
+                                <div className="space-y-6">
+                                    <input 
+                                        type="text" className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none"
+                                        value={newNick} onChange={e => setNewNick(e.target.value)} placeholder="新昵称"
+                                    />
+                                    <div className="flex flex-wrap gap-3">
+                                        {colors.map(c => (
+                                            <div key={c} onClick={() => setNewColor(c)} className={`w-8 h-8 rounded-full cursor-pointer transition-all ${newColor === c ? 'scale-125 ring-4 ring-slate-100' : 'opacity-40'}`} style={{ backgroundColor: c }} />
+                                        ))}
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <button onClick={() => setView('dash')} className="flex-1 font-bold text-slate-400">返回</button>
+                                        <button onClick={() => {setProfile({...profile, nickname: newNick || profile.nickname, avatarColor: newColor}); setView('dash');}} className="flex-[2] bg-indigo-600 text-white py-4 rounded-2xl font-bold">保存修改</button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // 渲染并运行图标
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+        
+        // 监控 DOM 变化以渲染 Lucide 图标
+        setInterval(() => lucide.createIcons(), 500);
+    </script>
+</body>
+</html>
