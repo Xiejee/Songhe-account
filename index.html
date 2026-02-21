@@ -3,293 +3,301 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>松鹤账号中心 - 身份认证系统</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.5.0/remixicon.min.css">
+    <title>松鹤账号中心 - Passport</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.5.0/remixicon.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
-        body { font-family: 'Noto Sans SC', sans-serif; background-color: #f1f5f9; }
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 2rem; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1); }
-        .status-banner { animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-        .color-dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; transition: transform 0.2s; }
-        .color-dot:hover { transform: scale(1.2); }
-        .color-dot.active { ring: 3px offset 2px ring-indigo-500; transform: scale(1.1); }
+        :root {
+            --brand: #4f46e5;
+            --bg: #f3f4f6;
+            --card: #ffffff;
+            --text: #1f2937;
+            --sub: #6b7280;
+            --radius: 28px;
+            --bezier: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --sub: #94a3b8; }
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { 
+            margin: 0; 
+            font-family: 'PingFang SC', system-ui, sans-serif; 
+            background: var(--bg); 
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+            perspective: 1000px;
+        }
+
+        .card {
+            background: var(--card);
+            padding: 40px 30px;
+            border-radius: var(--radius);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+            text-align: center;
+            display: none;
+            animation: slideIn 0.6s var(--bezier) forwards;
+        }
+
+        .card.active { display: block; }
+
+        @keyframes slideIn {
+            from { transform: translateY(30px) rotateX(-10deg); opacity: 0; }
+            to { transform: translateY(0) rotateX(0); opacity: 1; }
+        }
+
+        .logo-box {
+            width: 72px; height: 72px;
+            background: var(--brand);
+            border-radius: 22px;
+            margin: 0 auto 24px;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 2.2rem;
+            box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
+            transition: 0.5s;
+        }
+
+        h2 { margin: 0 0 8px 0; font-size: 1.6rem; font-weight: 900; }
+        .sub-tip { color: var(--sub); font-size: 0.95rem; margin-bottom: 30px; }
+
+        /* 输入组件 */
+        .input-group { position: relative; margin-bottom: 20px; text-align: left; }
+        .input-group i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--sub); font-size: 1.2rem; }
+        .input-group input {
+            width: 100%;
+            padding: 18px 18px 18px 52px;
+            border-radius: 18px;
+            border: 2px solid rgba(0,0,0,0.05);
+            background: rgba(0,0,0,0.02);
+            color: var(--text);
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+        .input-group input:focus {
+            border-color: var(--brand);
+            background: var(--card);
+            box-shadow: 0 0 0 5px rgba(79, 70, 229, 0.1);
+        }
+
+        /* 按钮组件 */
+        .btn-main {
+            width: 100%;
+            padding: 18px;
+            border-radius: 18px;
+            background: var(--brand);
+            color: #fff;
+            border: none;
+            font-weight: 800;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-main:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        .btn-main:active { transform: scale(0.97); }
+
+        /* 个性化页面特有样式 */
+        .profile-avatar {
+            width: 90px; height: 90px;
+            border-radius: 30px;
+            margin: 0 auto 20px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.5rem; color: #fff; font-weight: 900;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+
+        .info-label { font-size: 0.85rem; color: var(--sub); margin-top: 15px; }
+        .info-value { font-size: 1.1rem; font-weight: 700; margin-bottom: 5px; }
+
+        .color-picker {
+            display: flex; justify-content: center; gap: 12px; margin: 25px 0;
+        }
+        .color-opt {
+            width: 32px; height: 32px; border-radius: 10px; cursor: pointer;
+            transition: 0.3s; border: 3px solid transparent;
+        }
+        .color-opt.active { border-color: var(--text); transform: scale(1.2); }
+
+        #msg { margin-top: 15px; font-size: 0.9rem; min-height: 1.2rem; transition: 0.3s; }
+        .error { color: #ef4444; animation: shake 0.4s; }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body>
 
-    <div id="auth-container" class="w-full max-w-md glass-card overflow-hidden">
-        <!-- 登录视图 -->
-        <div id="view-login" class="p-8">
-            <div class="text-center mb-8">
-                <div class="w-16 h-16 bg-indigo-600 rounded-2xl mx-auto flex items-center justify-center text-white text-3xl shadow-lg mb-4">
-                    <i class="ri-shield-user-fill"></i>
-                </div>
-                <h1 class="text-2xl font-black text-slate-800">松鹤账号中心</h1>
-                <p class="text-slate-500 text-sm mt-1">统一身份认证系统</p>
+    <div class="container">
+        <!-- 视图 1：登录界面 -->
+        <div id="view-login" class="card active">
+            <div class="logo-box" id="login-logo"><i class="ri-shield-user-fill"></i></div>
+            <h2>松鹤账号中心</h2>
+            <div class="sub-tip">统一身份认证 (Passport)</div>
+
+            <div class="input-group">
+                <i class="ri-user-3-line"></i>
+                <input type="number" id="uid" placeholder="请输入 10 位松鹤学号">
             </div>
 
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase ml-2 mb-1">学号 / 账号</label>
-                    <input type="text" id="login-uid" class="w-full p-4 bg-slate-100 rounded-2xl border-2 border-transparent focus:border-indigo-600 outline-none transition-all" placeholder="请输入10位学号">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase ml-2 mb-1">通行密码</label>
-                    <input type="password" id="login-pwd" class="w-full p-4 bg-slate-100 rounded-2xl border-2 border-transparent focus:border-indigo-600 outline-none transition-all" placeholder="请输入密码">
-                </div>
-                <button onclick="performLogin()" id="login-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-100 transition-all active:scale-95 flex items-center justify-center gap-2">
-                    确认登录并授权
-                </button>
+            <div class="input-group">
+                <i class="ri-lock-2-line"></i>
+                <input type="password" id="pwd" placeholder="请输入认证密码">
             </div>
-            <p class="text-center text-xs text-slate-400 mt-6">登录即代表您同意松鹤网络服务协议</p>
+
+            <button class="btn-main" onclick="handleVerify()">
+                <span>开始认证</span>
+                <i class="ri-arrow-right-line"></i>
+            </button>
+            <div id="msg"></div>
         </div>
 
-        <!-- 管理与成功视图 -->
-        <div id="view-manage" class="hidden">
-            <!-- 状态标注栏 -->
-            <div class="bg-amber-50 border-b border-amber-100 p-4 text-center status-banner">
-                <p class="text-amber-700 text-sm font-bold flex items-center justify-center gap-2">
-                    <i class="ri-error-warning-fill"></i>
-                    已登录完成，请手动重启程序。
-                </p>
-                <p class="text-amber-600 text-[10px] mt-1">当前正处于账户管理界面</p>
+        <!-- 视图 2：个人信息个性化 -->
+        <div id="view-profile" class="card">
+            <div id="user-avatar" class="profile-avatar"></div>
+            <h2 id="display-name">松鹤学子</h2>
+            <div class="sub-tip">欢迎回家，请确认您的身份信息</div>
+
+            <div style="background: rgba(0,0,0,0.03); padding: 15px; border-radius: 20px; text-align: left; margin-bottom: 20px;">
+                <div class="info-label">身份编号 (UID)</div>
+                <div class="info-value" id="display-uid"></div>
+                <div class="info-label">系统权限</div>
+                <div class="info-value" id="display-role"></div>
             </div>
 
-            <div class="p-8">
-                <div class="flex items-center gap-4 mb-8">
-                    <div id="user-avatar" class="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-md"></div>
-                    <div>
-                        <h2 id="user-display-name" class="text-xl font-black text-slate-800 leading-none"></h2>
-                        <p id="user-display-uid" class="text-sm text-slate-400 mt-2 font-mono"></p>
-                    </div>
-                </div>
-
-                <div class="space-y-3" id="manage-menu">
-                    <div onclick="showEditProfile()" class="p-4 bg-slate-50 rounded-2xl flex items-center justify-between group cursor-pointer hover:bg-slate-100 transition-all">
-                        <div class="flex items-center gap-3 text-slate-600">
-                            <i class="ri-user-settings-line text-xl"></i>
-                            <span class="font-bold">修改个人资料</span>
-                        </div>
-                        <i class="ri-arrow-right-s-line text-slate-300"></i>
-                    </div>
-                    <div onclick="showEditPassword()" class="p-4 bg-slate-50 rounded-2xl flex items-center justify-between group cursor-pointer hover:bg-slate-100 transition-all">
-                        <div class="flex items-center gap-3 text-slate-600">
-                            <i class="ri-lock-password-line text-xl"></i>
-                            <span class="font-bold">安全中心 (修改密码)</span>
-                        </div>
-                        <i class="ri-arrow-right-s-line text-slate-300"></i>
-                    </div>
-                </div>
-
-                <button onclick="performLogout()" class="w-full mt-8 py-4 text-red-500 font-bold border-2 border-red-50 hover:bg-red-50 rounded-2xl transition-all">
-                    退出当前账号
-                </button>
+            <div class="info-label" style="text-align: center; margin-bottom: 10px;">选择您的年度个性色</div>
+            <div class="color-picker" id="picker-container">
+                <!-- 颜色选项由 JS 动态生成 -->
             </div>
-        </div>
 
-        <!-- 修改资料视图 -->
-        <div id="view-edit-profile" class="hidden p-8">
-            <h2 class="text-xl font-black mb-6 text-slate-800 flex items-center gap-2">
-                <i class="ri-user-edit-line"></i> 修改个人资料
-            </h2>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase ml-2 mb-1">新昵称</label>
-                    <input type="text" id="edit-nickname" class="w-full p-4 bg-slate-100 rounded-2xl outline-none focus:ring-2 ring-indigo-500 transition-all">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase ml-2 mb-1">选择头像配色</label>
-                    <div class="flex gap-3 p-2 bg-white rounded-xl shadow-sm border border-slate-100" id="color-picker">
-                        <!-- 颜色由JS生成 -->
-                    </div>
-                </div>
-                <div class="flex gap-3 pt-4">
-                    <button onclick="goBack()" class="flex-1 py-4 font-bold text-slate-400 hover:bg-slate-50 rounded-2xl transition-all">返回</button>
-                    <button onclick="saveProfile()" class="flex-[2] py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg hover:bg-indigo-700 transition-all">保存修改</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 修改密码视图 -->
-        <div id="view-edit-pwd" class="hidden p-8">
-            <h2 class="text-xl font-black mb-6 text-slate-800 flex items-center gap-2">
-                <i class="ri-key-2-line"></i> 安全中心
-            </h2>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase ml-2 mb-1">当前旧密码</label>
-                    <input type="password" id="old-pwd" class="w-full p-4 bg-slate-100 rounded-2xl outline-none focus:ring-2 ring-indigo-500 transition-all">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase ml-2 mb-1">设置新密码</label>
-                    <input type="password" id="new-pwd" class="w-full p-4 bg-slate-100 rounded-2xl outline-none focus:ring-2 ring-indigo-500 transition-all">
-                </div>
-                <div class="flex gap-3 pt-4">
-                    <button onclick="goBack()" class="flex-1 py-4 font-bold text-slate-400 hover:bg-slate-50 rounded-2xl transition-all">返回</button>
-                    <button onclick="savePassword()" class="flex-[2] py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg hover:bg-indigo-700 transition-all">确认重置</button>
-                </div>
-            </div>
+            <button class="btn-main" id="confirm-btn" onclick="finalRedirect()">
+                <span>确认并进入 SCN</span>
+                <i class="ri-door-open-line"></i>
+            </button>
         </div>
     </div>
 
-    <script>
-        // 预定义配色
-        const THEME_COLORS = ["#4f46e5", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4"];
+<script>
+    let currentUser = null;
+    const colors = ["#4f46e5", "#ef4444", "#10b981", "#f59e0b", "#06b6d4", "#8b5cf6", "#ec4899"];
+
+    // 核心逻辑：验证并切换视图
+    function handleVerify() {
+        const uidInput = document.getElementById('uid').value.trim();
+        const pwdInput = document.getElementById('pwd').value.trim();
         
-        // 初始用户数据库（每个用户的初始密码均为 14145678）
-        const INITIAL_MOCK_USERS = {
-            "1420240102": { name: "超级管理员", color: "#4f46e5", pwd: "14145678" },
-            "1420240201": { name: "松鹤学子", color: "#10b981", pwd: "14145678" }
-        };
+        if(!uidInput || !pwdInput) return showError("请填写完整信息");
 
-        // 从本地存储获取实时数据库，如果没有则使用初始数据库
-        function getDB() {
-            const db = localStorage.getItem('songhe_user_db');
-            return db ? JSON.parse(db) : INITIAL_MOCK_USERS;
-        }
+        const uid = parseInt(uidInput);
+        const isClass1 = (uid >= 1420240101 && uid <= 1420240152);
+        const isClass2 = (uid >= 1420240201 && uid <= 1420240252);
 
-        function saveDB(db) {
-            localStorage.setItem('songhe_user_db', JSON.stringify(db));
-        }
-
-        let currentUser = null;
-        let selectedColor = "";
-
-        window.onload = () => {
-            const saved = localStorage.getItem('songhe_passport_session');
-            if (saved) {
-                currentUser = JSON.parse(saved);
-                showManageUI(currentUser);
-            }
-            initColorPicker();
-        };
-
-        function initColorPicker() {
-            const container = document.getElementById('color-picker');
-            THEME_COLORS.forEach(c => {
-                const dot = document.createElement('div');
-                dot.className = "color-dot";
-                dot.style.backgroundColor = c;
-                dot.onclick = () => {
-                    document.querySelectorAll('.color-dot').forEach(d => d.style.boxShadow = 'none');
-                    dot.style.boxShadow = '0 0 0 3px white, 0 0 0 5px ' + c;
-                    selectedColor = c;
-                };
-                container.appendChild(dot);
-            });
-        }
-
-        function performLogin() {
-            const uid = document.getElementById('login-uid').value.trim();
-            const pwd = document.getElementById('login-pwd').value.trim();
-            const btn = document.getElementById('login-btn');
-
-            if (!uid || !pwd) {
-                alert("请填写完整信息");
-                return;
+        if (isClass1 || isClass2) {
+            // 简单验证逻辑：学号即密码或 123456
+            if (pwdInput !== "123456" && pwdInput !== uidInput) {
+                return showError("认证密码不正确");
             }
 
-            btn.disabled = true;
-            btn.innerHTML = `<i class="ri-loader-4-line animate-spin"></i> 验证中...`;
+            // 初始化用户信息
+            const isAdmin = (uid === 1420240102 || uid === 1420240201);
+            currentUser = {
+                uid: uidInput,
+                name: isAdmin ? "管理员-" + uidInput.slice(-2) + "号" : "松鹤学子-" + uidInput.slice(-3),
+                role: isAdmin ? "admin" : "student",
+                color: isAdmin ? "#f59e0b" : "#4f46e5"
+            };
 
-            setTimeout(() => {
-                const db = getDB();
-                const userObj = db[uid];
-
-                if (userObj && userObj.pwd === pwd) {
-                    currentUser = { uid: uid, name: userObj.name, color: userObj.color };
-                    localStorage.setItem('songhe_passport_session', JSON.stringify(currentUser));
-
-                    const params = new URLSearchParams(window.location.search);
-                    const redirect = params.get('redirect');
-
-                    if (redirect) {
-                        const token = btoa(encodeURIComponent(JSON.stringify({ ...currentUser, time: Date.now() })));
-                        try {
-                            const target = new URL(redirect);
-                            target.searchParams.set('songhe_token', token);
-                            window.location.href = target.toString();
-                        } catch (e) { showManageUI(currentUser); }
-                    } else {
-                        showManageUI(currentUser);
-                    }
-                } else {
-                    alert("学号或密码不正确");
-                    btn.disabled = false;
-                    btn.innerText = "确认登录并授权";
-                }
-            }, 800);
+            showProfileView();
+        } else {
+            showError("该学号未在松鹤学子库中登记");
         }
+    }
 
-        function showManageUI(data) {
-            hideAllViews();
-            document.getElementById('view-manage').classList.remove('hidden');
-            const avatar = document.getElementById('user-avatar');
-            avatar.style.backgroundColor = data.color;
-            avatar.innerText = data.name[0];
-            document.getElementById('user-display-name').innerText = data.name;
-            document.getElementById('user-display-uid').innerText = "ID: " + data.uid;
-        }
+    // 切换到个性化视图
+    function showProfileView() {
+        document.getElementById('view-login').classList.remove('active');
+        document.getElementById('view-profile').classList.add('active');
 
-        // 修改资料逻辑
-        function showEditProfile() {
-            hideAllViews();
-            document.getElementById('view-edit-profile').classList.remove('hidden');
-            document.getElementById('edit-nickname').value = currentUser.name;
-            selectedColor = currentUser.color;
-        }
+        // 更新 UI 元素
+        const avatar = document.getElementById('user-avatar');
+        avatar.innerText = currentUser.name[0];
+        avatar.style.background = currentUser.color;
+        
+        document.getElementById('display-name').innerText = currentUser.name;
+        document.getElementById('display-uid').innerText = currentUser.uid;
+        document.getElementById('display-role').innerText = currentUser.role === 'admin' ? '系统管理员 (Super)' : '正式学子 (Standard)';
+        
+        // 动态主题
+        document.documentElement.style.setProperty('--brand', currentUser.color);
 
-        function saveProfile() {
-            const newName = document.getElementById('edit-nickname').value.trim();
-            if (!newName) return alert("昵称不能为空");
+        // 生成颜色选择器
+        const container = document.getElementById('picker-container');
+        container.innerHTML = '';
+        colors.forEach(c => {
+            const div = document.createElement('div');
+            div.className = `color-opt ${c === currentUser.color ? 'active' : ''}`;
+            div.style.background = c;
+            div.onclick = () => selectColor(c, div);
+            container.appendChild(div);
+        });
+    }
 
-            const db = getDB();
-            db[currentUser.uid].name = newName;
-            db[currentUser.uid].color = selectedColor;
-            saveDB(db);
+    // 个性色选择
+    function selectColor(color, el) {
+        currentUser.color = color;
+        document.documentElement.style.setProperty('--brand', color);
+        document.getElementById('user-avatar').style.background = color;
+        
+        document.querySelectorAll('.color-opt').forEach(opt => opt.classList.remove('active'));
+        el.classList.add('active');
+    }
 
-            currentUser.name = newName;
-            currentUser.color = selectedColor;
-            localStorage.setItem('songhe_passport_session', JSON.stringify(currentUser));
-            
-            alert("资料已更新");
-            showManageUI(currentUser);
-        }
+    // 最终封装 Token 并跳转
+    function finalRedirect() {
+        const btn = document.getElementById('confirm-btn');
+        btn.innerText = "正在接入系统...";
+        btn.disabled = true;
 
-        // 修改密码逻辑
-        function showEditPassword() {
-            hideAllViews();
-            document.getElementById('view-edit-pwd').classList.remove('hidden');
-        }
+        // 构建 5.1 协议兼容的加密数据
+        const userData = {
+            uid: currentUser.uid,
+            name: currentUser.name,
+            color: currentUser.color,
+            role: currentUser.role,
+            ts: Date.now()
+        };
 
-        function savePassword() {
-            const oldPwd = document.getElementById('old-pwd').value;
-            const newPwd = document.getElementById('new-pwd').value;
-            const db = getDB();
+        const token = btoa(encodeURIComponent(JSON.stringify(userData)));
+        
+        const params = new URLSearchParams(window.location.search);
+        let redirect = params.get('redirect');
+        
+        setTimeout(() => {
+            if (redirect) {
+                const joinChar = redirect.includes('?') ? '&' : '?';
+                window.location.href = decodeURIComponent(redirect) + joinChar + "songhe_token=" + token;
+            } else {
+                alert("认证成功！Token: " + token + "\n未检测到回调地址。");
+            }
+        }, 1000);
+    }
 
-            if (db[currentUser.uid].pwd !== oldPwd) return alert("旧密码验证失败");
-            if (newPwd.length < 6) return alert("新密码至少需要6位");
-
-            db[currentUser.uid].pwd = newPwd;
-            saveDB(db);
-            alert("密码修改成功，请重新登录");
-            performLogout();
-        }
-
-        function goBack() { showManageUI(currentUser); }
-
-        function hideAllViews() {
-            ['view-login', 'view-manage', 'view-edit-profile', 'view-edit-pwd'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
-        }
-
-        function performLogout() {
-            localStorage.removeItem('songhe_passport_session');
-            window.location.reload();
-        }
-    </script>
+    function showError(text) {
+        const msg = document.getElementById('msg');
+        msg.className = "error";
+        msg.innerText = text;
+        setTimeout(() => msg.className = "", 400);
+    }
+</script>
 </body>
 </html>
+
