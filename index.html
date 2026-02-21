@@ -202,8 +202,8 @@
         const isClass2 = (uid >= 1420240201 && uid <= 1420240252);
 
         if (isClass1 || isClass2) {
-            // 简单验证逻辑：学号即密码或 123456
-            if (pwdInput !== "123456" && pwdInput !== uidInput) {
+            // 简单验证逻辑：学号即密码或 14145678
+            if (pwdInput !== "14145678" && pwdInput !== uidInput) {
                 return showError("认证密码不正确");
             }
 
